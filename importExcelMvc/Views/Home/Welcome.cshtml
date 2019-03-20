@@ -1,0 +1,22 @@
+﻿@{
+    ViewData["Title"] = "Welcome";
+}
+
+<h2>Welcome</h2>
+
+<div>
+    <h4>Startup</h4>
+    <hr />
+    <dl class="dl-horizontal">
+    </dl>
+    <ul>
+        @for (int i = 0; i < (int)ViewData["Vezes"]; i++)
+        {
+            <li>@ViewData["Mensagem"]</li>
+        }
+    </ul>
+</div>
+<div>
+    @Html.ActionLink("Edit", "Edit", new { /* id = Model.PrimaryKey */ }) |
+    <a asp-action="Index">Back to List</a>
+</div>

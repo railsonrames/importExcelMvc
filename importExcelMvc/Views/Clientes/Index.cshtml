@@ -1,0 +1,65 @@
+﻿@model importExcelMvc.Models.ClienteCondominioViewModel
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h2>Index</h2>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Novo</a>
+</p>
+
+<form asp-controller="Clientes" asp-action="Index" method="get">
+    <p>
+        Condomínio: <select asp-for="ClienteCondominio" asp-items="Model.Condominios">
+            <option value="">Todos</option>
+        </select>
+
+        Nome: <input type="text" asp-for="TermoDeBusca" />
+        <input type="submit" value="Filtrar" />
+    </p>
+</form>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Clientes[0].Nome)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Clientes[0].Endereco)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Clientes[0].Condominio)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Clientes[0].Telefone)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model.Clientes) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Nome)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Endereco)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Condominio)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Telefone)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.Id">Editar</a> |
+                <a asp-action="Details" asp-route-id="@item.Id">Detalhar</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">Apagar</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
