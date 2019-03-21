@@ -48,12 +48,6 @@ namespace importExcelMvc.Views
             return View(clienteCondominioViewModel);
         }
 
-        //[HttpPost]
-        //public string Index(string termoDeBusca, bool notUsed)
-        //{
-        //    return "From [HttpPost]Index: filter on " + termoDeBusca;
-        //}
-
         // GET: Clientes/Details/5
         public async Task<IActionResult> Details(int? id)
         {
