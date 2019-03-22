@@ -1,8 +1,4 @@
-﻿@{
-    Layout = null;
-}
-
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 
 <html>
 <head>
@@ -65,8 +61,11 @@
                     if (response.length == 0)
                         alert(`Alguma treta detectada na subida do arquivo.`);
                     else {
-                        $(`#dvData`).html(e.responseText);
+                        $(`#dvData`).html(response);
                     }
+                },
+                error: function (excecao) {
+                    $(`#dvData`).html(excecao.responseText);
                 }
             });
         });

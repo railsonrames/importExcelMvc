@@ -1,9 +1,12 @@
-﻿using Microsoft.AspNetCore.Hosting;
+﻿using importExcelMvc.Data;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -14,9 +17,11 @@ namespace importExcelMvc.Controllers
     public class ExcelController : Controller
     {
         private IHostingEnvironment _hostingEnvironment;
-        public ExcelController(IHostingEnvironment hostingEnvironment)
+        private readonly Contexto _contexto;
+        public ExcelController(IHostingEnvironment hostingEnvironment, Contexto contexto)
         {
             _hostingEnvironment = hostingEnvironment;
+            _contexto = contexto;
         }
 
         public IActionResult Index()
@@ -105,6 +110,7 @@ namespace importExcelMvc.Controllers
                         XSSFWorkbook xssfwb = new XSSFWorkbook(stream); // Excel 2007 em diante
                         planilha = xssfwb.GetSheetAt(0);
                     }
+                    bool gravacao = gravarEmBanco(planilha);
                     IRow linhaDoCabecalho = planilha.GetRow(0);
                     int contadorDeCelulas = linhaDoCabecalho.LastCellNum;
                     sb.Append("<table class='table'><tr>");
@@ -114,8 +120,8 @@ namespace importExcelMvc.Controllers
                         if (celula == null || string.IsNullOrEmpty(celula.ToString())) continue;
                         sb.Append("<th>" + celula.ToString() + "</th>");
                     }
-                    sb.Append("</th>");
-                    sb.AppendLine("<th>");
+                    sb.Append("</tr>");
+                    sb.AppendLine("<tr>");
                     for (int i = (planilha.FirstRowNum + 1); i <= planilha.LastRowNum; i++) // Faz a leitura do arquivo 
                     {
                         IRow linha = planilha.GetRow(i);
@@ -129,9 +135,77 @@ namespace importExcelMvc.Controllers
                         sb.AppendLine("</tr>");
                     }
                     sb.Append("</table>");
+                    if (gravacao)
+                        sb.Append("<h2>Registros gravados em banco com sucesso!</h2>");
                 }
             }
             return this.Content(sb.ToString());
         }
+
+        private bool gravarEmBanco(ISheet planilha)
+        {
+            var clientes = new List<Cliente>();
+            int contadorNovosClientes = 0;
+            IRow linhaDoCabecalho = planilha.GetRow(0);
+            int numeroDaUltimaCelulaDoCabecalho = linhaDoCabecalho.LastCellNum;
+            for (int linha = (planilha.FirstRowNum + 1); linha <= planilha.LastRowNum; linha++)
+            {
+                IRow linhaAtual = planilha.GetRow(linha);
+                if (linhaAtual == null) continue;
+                if (linhaAtual.Cells.All(x => x.CellType == CellType.Blank)) continue;
+                var oCliente = new Cliente();
+                for (int i = linhaAtual.FirstCellNum; i < numeroDaUltimaCelulaDoCabecalho; i++)
+                {
+                    if (linhaAtual.GetCell(i) != null)
+                    {
+                        switch (i)
+                        {
+                            case 0:
+                                oCliente.Nome = linhaAtual.GetCell(i).ToString();
+                                break;
+                            case 1:
+                                oCliente.Endereco = linhaAtual.GetCell(i).ToString();
+                                break;
+                            case 2:
+                                oCliente.Condominio = linhaAtual.GetCell(i).ToString();
+                                break;
+                            case 3:
+                                oCliente.Telefone = linhaAtual.GetCell(i).ToString();
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                    contadorNovosClientes++;
+                }
+                clientes.Add(oCliente);
+            }
+            return gracavaoEmLote(clientes) == clientes.Count;
+        }
+
+        private int gracavaoEmLote(List<Cliente> listaDeClientes)
+        {
+            foreach (var item in listaDeClientes)
+            {
+                _contexto.Add(item);
+            }
+            return _contexto.SaveChanges();
+        }
     }
 }
+
+//public async void CriacaoEmLote(List<Cliente> listaDeClientes)
+//{
+//    _context.Add(listaDeClientes);
+//    await _context.SaveChangesAsync();
+//}
+
+//for (int k = 0; k < clientes.Capacity; k++)
+//{
+//    for (int i = 0; i < numeroDaUltimaCelulaDoCabecalho; i++)
+//    {
+//        ICell celula = linhaDoCabecalho.GetCell(i);
+//        if (celula == null || string.IsNullOrEmpty(celula.ToString())) continue;
+//        clientes[k].Nome = celula.ToString();
+//    }
+//}

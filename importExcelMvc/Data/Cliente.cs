@@ -6,14 +6,10 @@ namespace importExcelMvc.Data
 {
     public partial class Cliente
     {
-        public int Id { get; set; }
-        [StringLength(50, MinimumLength = 7)]        
+        public int Id { get; set; }        
         public string Nome { get; set; }        
-        public string Endereco { get; set; }
-        [RegularExpression(@"^[A-Z]+[a-zA-Z""'\s-]*$")]
-        [Required]
-        public string Condominio { get; set; }        
-        [Required]
+        public string Endereco { get; set; }                
+        public string Condominio { get; set; }                
         public string Telefone { get; set; }
     }
 }
