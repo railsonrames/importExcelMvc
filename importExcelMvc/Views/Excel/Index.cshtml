@@ -61,12 +61,11 @@
                     if (response.length == 0)
                         alert('Alguma treta detectada na subida do arquivo.');
                     else {
-                        debugger;
-                        $('#dvData').html(response);
+                        $(`#dvData`).html(response);
                     }
                 },
-                erro: function (e) {
-                    $('#dvData').html(e.responseText);
+                error: function (excecao) {
+                    $(`#dvData`).html(excecao.responseText);
                 }
             });
         });
