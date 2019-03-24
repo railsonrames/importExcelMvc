@@ -111,19 +111,19 @@ namespace importExcelMvc.Controllers
                         workbook = new XSSFWorkbook(stream); // Excel 2007 em diante                        
                         planilha = workbook.GetSheetAt(0);
                     }
-                    bool gravacao = gravarEmBanco(planilha);
+                    //bool gravacao = gravarEmBanco(planilha);                   
                     IRow linhaDoCabecalho = planilha.GetRow(0);
                     int contadorDeCelulas = linhaDoCabecalho.LastCellNum;
                     sb.Append("<table class='table'><tr>");
                     for (int i = 0; i < contadorDeCelulas; i++)
                     {                        
                         ICell celula = linhaDoCabecalho.GetCell(i);
-                        var valorDaCelula = avaliadorDeFormula.Evaluate(celula);
                         if (celula == null || string.IsNullOrEmpty(celula.ToString())) continue;
-                        sb.Append("<th>" + valorDaCelula.ToString() + "</th>");                        
+                        sb.Append("<th>" + celula.ToString() + "</th>");                        
                     }
                     sb.Append("</tr>");
                     sb.AppendLine("<tr>");
+                    IFormulaEvaluator avaliadorDeFormula = workbook.GetCreationHelper().CreateFormulaEvaluator();
                     for (int i = (planilha.FirstRowNum + 1); i <= planilha.LastRowNum; i++) // Faz a leitura do arquivo 
                     {
                         IRow linha = planilha.GetRow(i);
@@ -132,13 +132,22 @@ namespace importExcelMvc.Controllers
                         for (int j = linha.FirstCellNum; j < contadorDeCelulas; j++)
                         {
                             if (linha.GetCell(j) != null)
-                                sb.Append("<td>" + linha.GetCell(j).ToString() + "</td>");
+                            {
+                                if (linha.GetCell(j).CellType == CellType.Formula)
+                                {
+                                    sb.Append("<td>" + avaliadorDeFormula.Evaluate(linha.GetCell(j)).NumberValue + "</td>");
+                                }
+                                else
+                                {
+                                    sb.Append("<td>" + linha.GetCell(j).ToString() + "</td>");
+                                }
+                            }
                         }
                         sb.AppendLine("</tr>");
                     }
                     sb.Append("</table>");
-                    if (gravacao)
-                        sb.Append("<h2>Registros gravados em banco com sucesso!</h2>");
+                    //if (gravacao)
+                    //    sb.Append("<h2>Registros gravados em banco com sucesso!</h2>");
                 }
             }
             return this.Content(sb.ToString());
@@ -162,16 +171,16 @@ namespace importExcelMvc.Controllers
                     {
                         switch (i)
                         {
-                            case 0:
+                            case 1:
                                 oCliente.Nome = linhaAtual.GetCell(i).ToString();
                                 break;
-                            case 1:
+                            case 3:
                                 oCliente.Endereco = linhaAtual.GetCell(i).ToString();
                                 break;
                             case 2:
                                 oCliente.Condominio = linhaAtual.GetCell(i).ToString();
                                 break;
-                            case 3:
+                            case 4:
                                 oCliente.Telefone = linhaAtual.GetCell(i).ToString();
                                 break;
                             default:
@@ -195,19 +204,3 @@ namespace importExcelMvc.Controllers
         }
     }
 }
-
-//public async void CriacaoEmLote(List<Cliente> listaDeClientes)
-//{
-//    _context.Add(listaDeClientes);
-//    await _context.SaveChangesAsync();
-//}
-
-//for (int k = 0; k < clientes.Capacity; k++)
-//{
-//    for (int i = 0; i < numeroDaUltimaCelulaDoCabecalho; i++)
-//    {
-//        ICell celula = linhaDoCabecalho.GetCell(i);
-//        if (celula == null || string.IsNullOrEmpty(celula.ToString())) continue;
-//        clientes[k].Nome = celula.ToString();
-//    }
-//}
