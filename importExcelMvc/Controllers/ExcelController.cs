@@ -59,7 +59,7 @@ namespace importExcelMvc.Controllers
                 row.CreateCell(4).SetCellValue("(61) 3200-9854");
 
                 row = planilhaExcel.CreateRow(3);
-                row.CreateCell(0).SetCellValue(2);
+                row.CreateCell(0).SetCellValue(3);
                 row.CreateCell(1).SetCellValue("Maria Inez Ibiapina de Sousa");
                 row.CreateCell(2).SetCellValue("RESDENCIAL CALLED JUNINO");
                 row.CreateCell(3).SetCellValue("QS 7 CONJUNTO 3 BLOCO K CASA 11");
@@ -89,33 +89,36 @@ namespace importExcelMvc.Controllers
             if (arquivo.Length > 0)
             {
                 string extensaoDoArquivo = Path.GetExtension(arquivo.FileName).ToLower();
-                ISheet planilha;
+                ISheet planilha;                
                 string caminhoCompleto = Path.Combine(novoCaminho, arquivo.FileName);
                 using (var stream = new FileStream(caminhoCompleto, FileMode.Create))
                 {
                     arquivo.CopyTo(stream);
                     stream.Position = 0;
+                    IWorkbook workbook;
                     if (extensaoDoArquivo == ".xls")
                     {
-                        HSSFWorkbook hssfwb = new HSSFWorkbook(stream); // Galera do Excel 97 até o 2k
-                        planilha = hssfwb.GetSheetAt(0);
+                        workbook = new HSSFWorkbook(stream); // Galera do Excel 97 até o 2k
+                        planilha = workbook.GetSheetAt(0);
                     }
                     else
                     {
-                        XSSFWorkbook xssfwb = new XSSFWorkbook(stream); // Excel 2007 em diante
-                        planilha = xssfwb.GetSheetAt(0);
+                        workbook = new XSSFWorkbook(stream); // Excel 2007 em diante                        
+                        planilha = workbook.GetSheetAt(0);
                     }
-                    IRow linhaDoCabecalho = planilha.GetRow(0);
+                    IRow linhaDoCabecalho = planilha.GetRow(4);
+                    IFormulaEvaluator avaliadorDeFormula = workbook.GetCreationHelper().CreateFormulaEvaluator();
                     int contadorDeCelulas = linhaDoCabecalho.LastCellNum;
                     sb.Append("<table class='table'><tr>");
                     for (int i = 0; i < contadorDeCelulas; i++)
-                    {
+                    {                        
                         ICell celula = linhaDoCabecalho.GetCell(i);
+                        var valorDaCelula = avaliadorDeFormula.Evaluate(celula);
                         if (celula == null || string.IsNullOrEmpty(celula.ToString())) continue;
-                        sb.Append("<th>" + celula.ToString() + "</th>");
+                        sb.Append("<th>" + valorDaCelula.ToString() + "</th>");                        
                     }
-                    sb.Append("</th>");
-                    sb.AppendLine("<th>");
+                    sb.Append("</tr>");
+                    sb.AppendLine("<tr>");
                     for (int i = (planilha.FirstRowNum + 1); i <= planilha.LastRowNum; i++) // Faz a leitura do arquivo 
                     {
                         IRow linha = planilha.GetRow(i);

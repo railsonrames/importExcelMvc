@@ -1,8 +1,4 @@
-﻿@{
-    Layout = null;
-}
-
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 
 <html>
 <head>
@@ -33,9 +29,9 @@
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
 <script>
     $(document).ready(function () {
-        $(`#botaoDeUpload`).on(`click`, function () {
-            var extensaoDoArquivo = [`xls`, `xlsx`]
-            var nomeDoArquivo = $(`#arquivoParaSubir`).val();
+        $('#botaoDeUpload').on('click', function () {
+            var extensaoDoArquivo = ['xls', 'xlsx']
+            var nomeDoArquivo = $('#arquivoParaSubir').val();
             if (nomeDoArquivo.length == 0) {
                 alert("Selecione um arquivo, meu jovem.");
                 return false;
@@ -48,7 +44,7 @@
                 }
             }
             var fdata = new FormData();
-            var arquivoParaSubir = $(`#arquivoParaSubir`).get(0);
+            var arquivoParaSubir = $('#arquivoParaSubir').get(0);
             debugger;
             var arquivos = arquivoParaSubir.files;
             fdata.append(arquivos[0].name, arquivos[0]);
@@ -56,17 +52,21 @@
                 type: "POST",
                 url: "/Excel/OnPostImportar",
                 beforeSend: function (xhr) {
-                    xhr.setRequestHeader("XSRF-TOKEN", $(`input:hidden[name="__RequestVerificationToken"]`).val());
+                    xhr.setRequestHeader("XSRF-TOKEN", $('input:hidden[name="__RequestVerificationToken"]').val());
                 },
                 data: fdata,
                 contentType: false,
                 processData: false,
                 success: function (response) {
                     if (response.length == 0)
-                        alert(`Alguma treta detectada na subida do arquivo.`);
+                        alert('Alguma treta detectada na subida do arquivo.');
                     else {
-                        $(`#dvData`).html(e.responseText);
+                        debugger;
+                        $('#dvData').html(response);
                     }
+                },
+                erro: function (e) {
+                    $('#dvData').html(e.responseText);
                 }
             });
         });
