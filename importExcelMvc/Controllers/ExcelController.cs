@@ -111,8 +111,9 @@ namespace importExcelMvc.Controllers
                         workbook = new XSSFWorkbook(stream); // Excel 2007 em diante                        
                         planilha = workbook.GetSheetAt(0);
                     }
-                    //bool gravacao = gravarEmBanco(planilha);                   
-                    IRow linhaDoCabecalho = planilha.GetRow(0);
+                    //bool gravacao = gravarEmBanco(planilha);    
+                    int posicaoLinhaCabecalho = 3;
+                    IRow linhaDoCabecalho = planilha.GetRow(posicaoLinhaCabecalho);
                     int contadorDeCelulas = linhaDoCabecalho.LastCellNum;
                     sb.Append("<table class='table'><tr>");
                     for (int i = 0; i < contadorDeCelulas; i++)
@@ -124,7 +125,7 @@ namespace importExcelMvc.Controllers
                     sb.Append("</tr>");
                     sb.AppendLine("<tr>");
                     IFormulaEvaluator avaliadorDeFormula = workbook.GetCreationHelper().CreateFormulaEvaluator();
-                    for (int i = (planilha.FirstRowNum + 1); i <= planilha.LastRowNum; i++) // Faz a leitura do arquivo 
+                    for (int i = (planilha.FirstRowNum + posicaoLinhaCabecalho); i <= planilha.LastRowNum; i++) // Faz a leitura do arquivo 
                     {
                         IRow linha = planilha.GetRow(i);
                         if (linha == null) continue;
